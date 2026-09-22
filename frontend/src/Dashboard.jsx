@@ -49,6 +49,14 @@ function Stats({ artifact }) {
 
 function Item({ artifact }) {
   const [showSql, setShowSql] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  function copySql(e) {
+    e.stopPropagation();
+    navigator.clipboard.writeText(artifact.sql);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
   const wide = ["line", "area", "table", "stacked_bar", "treemap"].includes(artifact.view);
   // A bar chart with many rows gets taller, so every name keeps its label.
   const height = ["bar", "stacked_bar"].includes(artifact.view) && artifact.row_count > 10 && !showSql
@@ -67,8 +75,8 @@ function Item({ artifact }) {
       {showSql ? (
         <>
           <pre className="item-sql">{formatSql(artifact.sql)}</pre>
-          <button className="copy" onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(artifact.sql); }}>
-            Copy SQL
+          <button className={copied ? "copy done" : "copy"} onClick={copySql}>
+            {copied ? "Copied" : "Copy SQL"}
           </button>
         </>
       ) : artifact.view === "table" ? (

@@ -43,6 +43,10 @@ To compare series on one chart, return one column per series, for example with
 ## Columns
 
 - `x` is the category or time column. `y` is one or more numeric columns.
+- Label each bar with what it is. When each row has a name and a group, such as a player and a
+  team, chart the name, or return one label column such as
+  `scorer || ' (' || team || ')' AS player`. The chart cannot show a column that is neither x
+  nor y.
 - For `scatter`, `y` is two numeric columns, across then up, and `x` names each point.
 - Order the rows in SQL the way they should appear: rankings largest first, time oldest first.
 - Keep bar charts to about 15 bars. Limit the query if needed.

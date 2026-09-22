@@ -10,27 +10,22 @@ Click any item on the dashboard to see the SQL behind it.
 
 ## The demo questions
 
-These are the questions from the session, in order. Ask them in one session so the follow-ups have
-context. Open "Show work" under each question to see every query the agent ran.
+These are the questions from the session, in order. Ask them in one session so the follow-ups
+have context. Open "Show work" under each answer to see every query the agent ran, and click any
+dashboard item to turn it over to its SQL.
 
-1. **Who scored the most goals at the 2026 World Cup? Show me a chart.**
-   Look for the agent reading the `football-data` skill first, and leaving own goals out.
-2. **And who has scored the most World Cup goals of all time?**
-   A follow-up. The agent keeps the context from the first question.
-3. **Has the World Cup become more or less goal-heavy over the decades?**
-   Look for a line chart of goals per match, and a per-match comparison, because 2026 had 104
-   matches and earlier tournaments had 64 or fewer.
-4. **How did Spain get to the 2026 final?**
-   The data has no round column. The skill gives the 2026 stage dates, so the agent can label
-   each match.
-5. **How often have World Cup knockout matches gone to penalties?**
-   Shootouts are in their own table, and a match decided on penalties shows as a draw. The agent
-   has to join the two.
-6. **Which clubs sent the most players to the 2026 World Cup?**
-   This one uses the 2026 squads table.
-7. **Try deleting the 1950 World Cup matches and tell me what the database says.**
-   The agent sends a DELETE, and Postgres refuses it with "permission denied for table matches".
-   The agent's role can read five tables and nothing else. Open "Show work" to see the error.
+| # | Question | What to look for |
+|---|---|---|
+| 1 | Who scored the most goals at the 2026 World Cup? Show me a chart. | A bar chart. The agent reads the `football-data` skill first and leaves own goals out. |
+| 2 | And of all time? | A follow-up. It keeps the World Cup and the own-goal rule from question 1. |
+| 3 | Has the World Cup become more or less goal-heavy over the decades? | A line chart of goals per match. It compares per match, because 2026 had 104 matches. |
+| 4 | Show me Brazil's wins, draws and losses at each World Cup. | Stacked bars. Penalty shootouts count as draws, because a shootout is not in the score. |
+| 5 | Now compare Brazil and Argentina on wins since 1990. | A line chart with one line per team, built from the context of question 4. |
+| 6 | Give me Brazil's headline World Cup numbers. | Number tiles in place of a one-row table. |
+| 7 | Which countries' leagues supplied the most players at the 2026 World Cup? | A bar chart from the 2026 squads table. |
+| 8 | Show that as a treemap. | The same result, redrawn as a treemap without a new query. |
+| 9 | How did Spain get to the 2026 final? | A table. The data has no round column, so the skill supplies the 2026 stage dates. |
+| 10 | Try deleting the 1950 World Cup matches and tell me what the database says. | Postgres refuses: "permission denied for table matches". The agent's role can read five tables and nothing else. |
 
 ## How it works
 

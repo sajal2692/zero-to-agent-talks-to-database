@@ -29,8 +29,13 @@ function fade(color, horizontal = false) {
 
 function buildOption({ view, x, y, columns, rows }) {
   const column = (name) => rows.map((row) => row[columns.indexOf(name)]);
-  const labels = column(x).map(String);
   const overTime = column(x).every((value) => typeof value === "number" || /^\d{4}/.test(value));
+  // Text columns the chart would otherwise drop, such as a scorer's name beside his team, join
+  // the label, so "Germany" becomes "Germany · Miroslav Klose" and no part of the answer is lost.
+  const extras = overTime ? [] : columns.filter((c) => c !== x && !y.includes(c)
+    && rows.every((row) => typeof row[columns.indexOf(c)] === "string"));
+  const labels = rows.map((row) =>
+    [x, ...extras].map((c) => String(row[columns.indexOf(c)])).join(" · "));
   const base = {
     color: COLORS,
     textStyle: FONT,
