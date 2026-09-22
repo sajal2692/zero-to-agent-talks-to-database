@@ -9,17 +9,10 @@ at the top of each source file describe what the diagram leaves out.
 
 ![System architecture](architecture.png)
 
-- The React app sends a question to FastAPI, and FastAPI streams the agent's steps back on the
-  same HTTP response as server-sent events.
-- FastAPI hands the question to the Deep Agents harness. The harness holds the agent loop, the
-  two tools, and the three skills, and returns every message it produces.
-- The agent loop sends model requests to OpenAI. This is the only outside service.
-- The tools reach the football data as `agent_reader`, a role with SELECT and nothing else.
-- FastAPI reads and writes the app data: sessions, query results, dashboard items, costs, and the
-  agent's conversation memory.
-
-The code for each part is listed in the
-[repository map](../README.md#a-map-of-the-repository).
+The React app sends a question to FastAPI, and FastAPI streams the agent's steps back. The Deep
+Agents harness holds the agent loop, its tools, and its skills. The tools read the football data
+through a read-only role, and FastAPI keeps sessions and results in the app data.
+[`docs/components.md`](../docs/components.md) describes each part and links its code.
 
 ## Chart generation
 
