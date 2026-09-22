@@ -49,7 +49,6 @@ set up in [`db/init/03_agent_role.sql`](db/init/03_agent_role.sql).
 | [`backend/skills/`](backend/skills/) | The three skills |
 | [`backend/main.py`](backend/main.py) | The web API |
 | [`backend/store.py`](backend/store.py) | Saved sessions, results, dashboard items, and costs |
-| [`backend/tests/`](backend/tests/) | A stand-in for the model, for runs without an API key |
 | [`frontend/src/`](frontend/src/) | The React app: chat, dashboard, and charts |
 | [`db/init/`](db/init/) | The football tables, the app database, and the agent's read-only role |
 | [`db/data/`](db/data/) | The football data as CSV files |
@@ -119,16 +118,6 @@ To start again with no sessions, add `-v` to that command.
 
 Every row the agent reads is sent to the model provider, so leave out anything that should stay
 private.
-
-### Without an API key
-
-The backend has a scripted stand-in for the model. It plays one fixed conversation and costs
-nothing. It needs Python 3.12 with [uv](https://docs.astral.sh/uv/getting-started/installation/).
-Start the database with `docker compose up db`, then run this from `backend/`:
-
-```bash
-uv run python tests/smoke_test.py
-```
 
 ## Exercises
 
