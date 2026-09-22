@@ -8,8 +8,8 @@ description: How to write, check, and fix SQL for this Postgres database, includ
 ## Rules of the query tool
 
 - One statement per call. The tool rejects anything with a second statement.
-- SELECT only. The database role cannot change data, and every write fails with a
-  permission error.
+- Write SELECT queries. The database role has SELECT and nothing else, so Postgres refuses
+  any change to the data with a permission error.
 - Each query stops after a few seconds. Aggregate in SQL and avoid cross joins.
 - You see at most 50 rows. The dashboard keeps up to 1,000.
 

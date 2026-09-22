@@ -27,6 +27,7 @@ function buildOption({ view, x, y, columns, rows }) {
     type: "category", data: labels, axisTick: { show: false },
     axisLine: { lineStyle: { color: GRID } }, axisLabel: { color: overTime ? MUTED : INK, ...FONT },
   };
+  const everyLabel = { ...categoryAxis, axisLabel: { ...categoryAxis.axisLabel, interval: 0 } }; // ranked names
 
   // 1. Pie: one slice per row.
   if (view === "pie") {
@@ -63,7 +64,7 @@ function buildOption({ view, x, y, columns, rows }) {
   }));
   return overTime
     ? { ...base, xAxis: categoryAxis, yAxis: valueAxis, series: bars }
-    : { ...base, xAxis: valueAxis, yAxis: { ...categoryAxis, inverse: true }, series: bars };
+    : { ...base, xAxis: valueAxis, yAxis: { ...everyLabel, inverse: true }, series: bars };
 }
 
 export default function Chart({ artifact }) {

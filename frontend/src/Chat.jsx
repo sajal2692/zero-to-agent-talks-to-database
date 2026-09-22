@@ -1,6 +1,7 @@
 // The middle panel: each question, the agent's work, and its answer.
 
 import { useEffect, useRef, useState } from "react";
+import { formatSql } from "./sql.js";
 
 const STARTERS = [
   "Who scored the most goals at the 2026 World Cup? Show me a chart.",
@@ -62,7 +63,7 @@ function SqlStep({ step, result }) {
   return (
     <div className="sql">
       <div className="sql-top"><span>run_query</span>{badge}</div>
-      <pre>{step.sql}</pre>
+      <pre>{formatSql(step.sql)}</pre>
       {result && result.error && <div className="sql-error">{result.error}</div>}
     </div>
   );
@@ -116,7 +117,7 @@ function Turn({ turn, artifacts, live }) {
   );
 }
 
-export default function Chat({ title, events, artifacts, running, onAsk }) {
+export default function Chat({ title, events, artifacts, running, onAsk, onMenu }) {
   const [text, setText] = useState("");
   const bottom = useRef(null);
   const turns = toTurns(events);
@@ -133,13 +134,19 @@ export default function Chat({ title, events, artifacts, running, onAsk }) {
 
   return (
     <main className="chat">
-      <header className="chat-head"><b>{title}</b><span>gpt-6-sol</span></header>
+      <header className="chat-head">
+        <button className="icon-button" title="Sessions" onClick={onMenu}>☰</button>
+        <b>{title}</b>
+        <span>gpt-6-sol</span>
+      </header>
       <div className="messages">
         {turns.length === 0 && (
           <div className="empty">
             <h2>Ask about 150 years of international football</h2>
             <p>Every men's international match since 1872, and every goal at the 2026 World Cup.</p>
-            {STARTERS.map((q) => <button key={q} className="starter" onClick={() => send(q)}>{q}</button>)}
+            {STARTERS.map((q) => (
+              <button key={q} className="starter" disabled={running} onClick={() => send(q)}>{q}</button>
+            ))}
           </div>
         )}
         {turns.map((turn, i) => (

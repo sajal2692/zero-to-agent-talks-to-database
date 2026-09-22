@@ -4,6 +4,7 @@ main.py imports `agent`, `pool`, `log`, and `usage_and_cost` from this file.
 """
 
 import os
+import re
 import sys
 import threading
 import time
@@ -62,6 +63,29 @@ def log(where, heading, body=""):
         print(body, flush=True)
 
 
+CLAUSE = re.compile(r"(WITH|SELECT|FROM|(?:LEFT |RIGHT |INNER |FULL )?JOIN|WHERE|AND|GROUP BY|HAVING|ORDER BY|LIMIT|UNION)\b", re.I)
+
+
+def readable(sql):
+    """For the log: a query written on one line is broken before each main clause,
+    outside brackets and quotes."""
+    if "\n" in sql:
+        return sql
+    out, depth, quoted, i = [], 0, False, 0
+    while i < len(sql):
+        ch = sql[i]
+        quoted = not quoted if ch == "'" else quoted
+        depth += 0 if quoted else (ch == "(") - (ch == ")")
+        clause = ch == " " and depth == 0 and not quoted and CLAUSE.match(sql, i + 1)
+        if clause:
+            out.append(("\n  " if clause.group(1).upper() == "AND" else "\n") + clause.group(1))
+            i += 1 + len(clause.group(1))
+        else:
+            out.append(ch)
+            i += 1
+    return "".join(out)
+
+
 def plain(value):
     """Turn database values into things JSON can hold."""
     if isinstance(value, Decimal):
@@ -78,13 +102,14 @@ pool = store.open_pool(APP_DB_URL)
 # 2. Tool one: run a query as the read-only agent role, with the tool's own limits.
 @tool(response_format="content_and_artifact")
 def run_query(sql: str, runtime: ToolRuntime) -> tuple[str, dict]:
-    """Run one SQL SELECT statement against the football database.
+    """Run one SQL statement against the football database, as a read-only role.
 
-    Returns a result_id, the column names, and up to 50 rows. Pass the result_id to
-    add_to_dashboard to show the result beside the chat.
+    SELECT works. Postgres refuses anything that changes data, with a permission error.
+    Returns a result_id, the column names, and up to 50 rows, or the database's error.
+    Pass the result_id to add_to_dashboard to show the result beside the chat.
     """
     session_id = runtime.config["configurable"]["thread_id"]
-    log("DATABASE", "Query", sql)
+    log("DATABASE", "Query", readable(sql))
     started = time.time()
     columns, rows, truncated, error = None, None, False, None
 

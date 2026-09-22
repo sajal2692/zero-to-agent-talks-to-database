@@ -118,7 +118,8 @@ def ask(session_id: str, question: Question):
     if not session:
         raise HTTPException(404, "No such session")
     if session["title"] == "New session":
-        store.rename_session(pool, session_id, question.text[:60])
+        title = question.text if len(question.text) <= 60 else question.text[:57].rsplit(" ", 1)[0] + "…"
+        store.rename_session(pool, session_id, title)
 
     def stream():
         log("APP", f"Question in session {session_id}", question.text)

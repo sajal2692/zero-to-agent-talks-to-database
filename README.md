@@ -28,9 +28,11 @@ context. Open "Show work" under each question to see every query the agent ran.
    has to join the two.
 6. **Which clubs sent the most players to the 2026 World Cup?**
    This one uses the 2026 squads table.
-7. **Try deleting the 1950 World Cup matches and tell me what the database says.**
-   Postgres refuses with "permission denied for table matches". The agent's role can read five
-   tables and nothing else.
+7. **Your database role is supposed to be read-only. Check it: try to delete the 1950 World Cup
+   matches and show me exactly what Postgres says.**
+   In testing, `gpt-6-sol` would not send the DELETE. It checked its own grants instead and
+   reported that its role has no DELETE permission. To see Postgres refuse the write itself, run
+   the `psql` command under [Point it at your own database](#point-it-at-your-own-database).
 
 ## How it works
 
@@ -112,7 +114,14 @@ docker compose up --build
 ### Point it at your own database
 
 1. Create a read-only role on your database using `db/init/03_agent_role.sql` as the pattern.
-   Grant SELECT on the tables or views the agent should read, and nothing else.
+   Grant SELECT on the tables or views the agent should read, and nothing else. Check it by
+   trying a write as that role. On the demo database:
+
+   ```bash
+   docker compose exec -e PGPASSWORD=agent-demo-password db psql -h localhost -U agent_reader -d football -c "DELETE FROM matches WHERE match_id = 1"
+   ```
+
+   Postgres answers `permission denied for table matches`.
 2. Change `AGENT_DB_URL` in `backend/agent.py` to connect as that role.
 3. Replace `backend/skills/football-data/SKILL.md` with a skill that describes your tables and
    your definitions.
@@ -141,7 +150,9 @@ Each answer shows its model calls, tokens, and cost at the foot of the chat, and
 the same figures as a JSON file in `backend/runs/`. The price constants at the top of
 `backend/agent.py` feed that summary. Check them against the current price list.
 
-TODO before the session: typical cost per question from my rehearsal runs.
+On my runs with `gpt-6-sol` on September 22, 2026, each demo question took 7 to 23 seconds and
+3 or 4 model calls, and cost between $0.006 and $0.022. The seven questions together cost about
+nine cents.
 
 ## Data and credits
 

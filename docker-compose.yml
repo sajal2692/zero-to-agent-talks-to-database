@@ -40,6 +40,9 @@ services:
     build: ./frontend
     environment:
       API_URL: http://backend:8000                  # Vite passes /api calls to the backend
+      WATCH_POLLING: "true"
+    volumes:
+      - ./frontend/src:/app/src                     # edit the React code and the page reloads
     ports:
       - "5173:5173"
     depends_on:

@@ -14,6 +14,7 @@ numbers are the database's numbers. Add a result with `add_to_dashboard`, passin
 - Add the result that answers the question. Leave out exploration queries such as schema checks
   and value lookups.
 - Add one item per question unless the user asks for more.
+- A single number, such as a count, goes in the answer. Do not add it to the dashboard.
 - When the user asks for a follow-up ("now just Argentina"), add a new item. Do not replace the
   earlier one.
 
