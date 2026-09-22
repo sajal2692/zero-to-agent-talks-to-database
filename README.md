@@ -16,7 +16,7 @@ dashboard item to turn it over to its SQL.
 
 | # | Question | What to look for |
 |---|---|---|
-| 1 | Who scored the most goals at the 2026 World Cup? Show me a chart. | A bar chart of the top 10. The agent reads the `football-data` skill first and leaves own goals out. |
+| 1 | Who were the top scorers at the 2026 World Cup? | A bar chart of the top 10. The agent reads the `football-data` skill first and leaves own goals out. |
 | 2 | And of all time? | A follow-up. It keeps the World Cup and the own-goal rule from question 1. |
 | 3 | Has the World Cup become more or less goal-heavy over the decades? | A line chart of goals per match. It compares per match, because 2026 had 104 matches. |
 | 4 | Show me Brazil's wins, draws and losses at each World Cup. | Stacked bars. Penalty shootouts count as draws, because a shootout is not in the score. |

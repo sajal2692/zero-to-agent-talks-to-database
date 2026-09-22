@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { formatSql } from "./sql.js";
 
 const STARTERS = [
-  "Who scored the most goals at the 2026 World Cup? Show me a chart.",
+  "Who were the top scorers at the 2026 World Cup?",
   "Has the World Cup become more or less goal-heavy over the decades?",
   "How did Spain get to the 2026 final?",
   "Which clubs sent the most players to the 2026 World Cup?",
