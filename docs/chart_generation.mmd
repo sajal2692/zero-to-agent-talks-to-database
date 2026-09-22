@@ -1,0 +1,30 @@
+%% title: Chart generation
+%% One chart, end to end. The model never sends numbers for a chart: it names a stored result,
+%% a view, and columns, and the browser draws the chart from the rows Postgres returned.
+%% run_query connects as agent_reader. Results and dashboard items are saved in the app database.
+%% The item id reaches the browser in FastAPI's event stream, and the browser fetches the item,
+%% with its SQL and rows, through FastAPI. FastAPI is left out of the drawing to keep it small.
+%%{init: {"sequence": {"mirrorActors": false, "messageFontSize": 24, "actorFontSize": 26, "noteFontSize": 22, "actorMargin": 70, "boxMargin": 12}}}%%
+sequenceDiagram
+  participant AG as Agent loop
+  participant RQ as run_query
+  participant FB as Football data
+  participant APP as App data
+  participant AD as add_to_dashboard
+  participant BR as Browser
+
+  AG->>RQ: SQL
+  RQ->>FB: SQL, as agent_reader
+  FB-->>RQ: Rows
+  RQ->>APP: Result: SQL and rows
+  RQ-->>AG: Result id and first 50 rows
+  AG->>AD: Result id, view, and columns
+  Note over AD: View checked against the result
+  opt View unsuited to the result
+    AD-->>AG: Refusal, with a better view
+  end
+  AD->>APP: Dashboard item
+  AD-->>BR: Item id, in the event stream
+  BR->>APP: Item request
+  APP-->>BR: SQL and rows
+  Note over BR: ECharts chart from the stored rows

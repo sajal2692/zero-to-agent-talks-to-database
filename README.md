@@ -30,15 +30,20 @@ dashboard item to turn it over to its SQL.
 
 ## How it works
 
-![How the football data agent fits together](docs/architecture.png)
+![System architecture](docs/architecture.png)
 
-The diagram's source is [`docs/architecture.mmd`](docs/architecture.mmd).
+**Charts.** The model never sends the numbers for a chart. It names a stored result, a view, and
+the columns, and the browser draws the chart from the rows Postgres returned:
+
+![Chart generation](docs/chart_generation.png)
+
+The sources for both diagrams are in [`docs/`](docs/), as `.mmd` files.
 
 ```text
 frontend/   React app: sessions, chat, and the dashboard
 backend/    FastAPI and the agent
 db/         Postgres setup: tables, the data, and the agent's role
-docs/       the architecture diagram
+docs/       the architecture and chart generation diagrams
 ```
 
 **The agent** is in [`backend/agent.py`](backend/agent.py). Deep Agents runs the loop: the model
