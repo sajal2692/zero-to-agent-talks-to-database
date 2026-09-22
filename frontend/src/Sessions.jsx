@@ -1,5 +1,5 @@
 // The left rail: a list of sessions, like the chat list in ChatGPT or Claude.
-// Each session has a delete button, which asks before it deletes.
+// Each session has a delete button that shows on hover.
 
 function TrashIcon() {
   return (
@@ -33,10 +33,7 @@ export default function Sessions({ sessions, currentId, onSelect, onNew, onDelet
             className="delete"
             title="Delete session"
             aria-label={`Delete session: ${session.title}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (window.confirm(`Delete "${session.title}"? Its chat and dashboard will be removed.`)) onDelete(session.id);
-            }}
+            onClick={(e) => { e.stopPropagation(); onDelete(session.id); }}
           >
             <TrashIcon />
           </button>
