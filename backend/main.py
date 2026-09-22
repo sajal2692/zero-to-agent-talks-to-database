@@ -17,7 +17,7 @@ from pydantic import BaseModel
 import store
 from agent import agent, log, pool, usage_and_cost
 
-RUNS_DIR = Path(__file__).resolve().parent / "runs"   # one JSON file per question, with its cost
+RUNS_DIR = Path(__file__).resolve().parent / "runs"   # a JSON copy of each question's cost, for the instructor
 
 app = FastAPI()
 
@@ -89,7 +89,8 @@ def delete_session(session_id: str):
     return {"deleted": session_id}
 
 
-# 2. One session: its chat history, rebuilt from the agent's memory, and its dashboard.
+# 2. One session: its chat history rebuilt from the agent's memory, its dashboard, and the cost
+#    of each question.
 
 @app.get("/api/sessions/{session_id}")
 def get_session(session_id: str):
@@ -98,7 +99,12 @@ def get_session(session_id: str):
         raise HTTPException(404, "No such session")
     state = agent.get_state({"configurable": {"thread_id": session_id}})
     events = [event for message in state.values.get("messages", []) for event in to_events(message)]
-    return {"session": session, "events": events, "artifacts": store.list_artifacts(pool, session_id)}
+    return {
+        "session": session,
+        "events": events,
+        "artifacts": store.list_artifacts(pool, session_id),
+        "runs": store.list_runs(pool, session_id),
+    }
 
 
 @app.get("/api/artifacts/{artifact_id}")
@@ -140,8 +146,10 @@ def ask(session_id: str, question: Question):
             log("APP", "Error", repr(e))
             yield sse({"type": "error", "text": str(e)})
 
-        # 4. What this question cost, in the log, in runs/, and at the foot of the answer.
+        # 4. What this question cost: saved in the app database, copied to runs/, logged, and
+        #    shown at the foot of the answer.
         summary = usage_and_cost(produced, time.time() - started)
+        store.save_run(pool, session_id, question.text, summary)
         RUNS_DIR.mkdir(exist_ok=True)
         (RUNS_DIR / f"{datetime.now():%Y%m%d-%H%M%S}-{session_id}.json").write_text(
             json.dumps({"question": question.text, **summary}, indent=2))

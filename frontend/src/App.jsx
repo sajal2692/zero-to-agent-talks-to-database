@@ -13,6 +13,7 @@ export default function App() {
   const [currentId, setCurrentId] = useState(null);
   const [events, setEvents] = useState([]);
   const [artifacts, setArtifacts] = useState([]);
+  const [runs, setRuns] = useState([]);          // the cost of each earlier question in this session
   const [running, setRunning] = useState(false);
   const [railOpen, setRailOpen] = useState(window.innerWidth > 1100);
   const [tab, setTab] = useState("chat");   // which panel shows on a phone
@@ -32,6 +33,7 @@ export default function App() {
     api.getSession(currentId).then((data) => {
       setEvents(data.events);
       setArtifacts(data.artifacts);
+      setRuns(data.runs);
     });
   }, [currentId]);
 
@@ -52,6 +54,7 @@ export default function App() {
     setCurrentId(session.id);
     setEvents([]);
     setArtifacts([]);
+    setRuns([]);
     return session;
   }
 
@@ -63,6 +66,7 @@ export default function App() {
       setCurrentId(rest.length ? rest[0].id : null);
       setEvents([]);
       setArtifacts([]);
+      setRuns([]);
     }
   }
 
@@ -100,6 +104,7 @@ export default function App() {
         title={current ? current.title : "New session"}
         events={events}
         artifacts={artifacts}
+        runs={runs}
         running={running}
         onAsk={askQuestion}
         onMenu={() => setRailOpen(!railOpen)}

@@ -30,7 +30,8 @@ from martj42/international_results and openfootball/worldcup.json.
 
 **squads_2026**: one row per player at the 2026 World Cup, 1,248 rows.
 - `team`, `fifa_code`, `group_name` (A to L), `shirt_number`, `position` (GK, DF, MF, FW)
-- `player`, `date_of_birth`, `club`, `club_country`
+- `player`, `date_of_birth`, `club`, `club_country` (the club's country as a three-letter code,
+  such as ENG, ESP, or GER)
 - `squads_2026.team` uses the same team names as `matches`. `squads_2026.player` matches
   `goals.scorer` for 177 of the 178 players who scored at the 2026 World Cup.
 

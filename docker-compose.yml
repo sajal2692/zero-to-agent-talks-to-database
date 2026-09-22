@@ -29,6 +29,7 @@ services:
       DB_HOST: db
     volumes:
       - ./backend/runs:/app/runs                    # one JSON file per question, with its cost
+      - ./backend/skills:/app/skills:ro             # edit a skill and the next question uses it
     ports:
       - "8000:8000"
     tty: true                                       # keeps the coloured log lines

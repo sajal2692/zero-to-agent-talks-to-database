@@ -155,15 +155,16 @@ def run_query(sql: str, runtime: ToolRuntime) -> tuple[str, dict]:
 def add_to_dashboard(
     result_id: int,
     title: str,
-    view: Literal["bar", "line", "area", "pie", "scatter", "table"],
+    view: Literal["bar", "stacked_bar", "line", "area", "pie", "treemap", "scatter", "stat", "table"],
     runtime: ToolRuntime,
     x: str | None = None,
     y: list[str] | None = None,
 ) -> tuple[str, dict]:
-    """Show a query result on the dashboard beside the chat, as a chart or a table.
+    """Show a query result on the dashboard beside the chat, as a chart, headline numbers, or a table.
 
     result_id: the id run_query returned. x: the category or time column. y: one or more
-    numeric columns. For view="table", leave x and y out.
+    numeric columns. For view="table", leave x and y out. For view="stat", y names the numbers
+    to show from the first row. The dashboard skill says which view suits which result.
     """
     session_id = runtime.config["configurable"]["thread_id"]
     result = store.get_result(pool, result_id)
@@ -172,7 +173,9 @@ def add_to_dashboard(
     missing = [c for c in [x, *(y or [])] if c and c not in result["columns"]]
     if missing:
         return f"These columns are not in result {result_id}: {', '.join(missing)}", {}
-    if view != "table" and not (x and y):
+    if view == "stat" and not y:
+        return "Headline numbers need at least one y column.", {}
+    if view not in ("table", "stat") and not (x and y):
         return "A chart needs an x column and at least one y column.", {}
 
     artifact_id = store.save_artifact(pool, session_id, result_id, title, view, x, y or [])

@@ -1,0 +1,39 @@
+%% title: System architecture
+%% The three containers in docker-compose.yml, what runs in each, and what each database holds.
+%% Edge labels name the connection and the database role, not the order of steps.
+%% The agent's tools reach the football database only as agent_reader, which has SELECT and nothing else.
+%% The backend reaches the app database as the app role, which owns it.
+flowchart LR
+  subgraph FE["frontend container"]
+    direction TB
+    UI["React app<br/>sessions list, chat,<br/>dashboard with ECharts"]:::process
+  end
+
+  subgraph BE["backend container"]
+    direction TB
+    API["FastAPI<br/>sessions, ask stream,<br/>dashboard items"]:::process
+    AG["Deep Agents agent<br/>model loop, planning"]:::process
+    TL["Tools<br/>run_query<br/>add_to_dashboard"]:::process
+    SK["Skills<br/>read-only markdown"]:::neutral
+    API --- AG
+    AG --- TL
+    AG --- SK
+  end
+
+  subgraph DB["db container: Postgres 18"]
+    direction TB
+    FB[("football database<br/>matches, goals,<br/>shootouts, squads")]:::durable
+    APP[("app database<br/>sessions, results,<br/>dashboard items, costs,<br/>conversation memory")]:::durable
+  end
+
+  OAI["OpenAI API<br/>gpt-6-sol"]:::external
+
+  UI <-- "REST and<br/>event stream" --> API
+  AG <-- "Model calls" --> OAI
+  TL -- "agent_reader<br/>SELECT only" --> FB
+  BE -- "app role<br/>read and write" --> APP
+
+  classDef process fill:#eaf3fc,stroke:#2367a5,color:#111111,stroke-width:2px;
+  classDef neutral fill:#f5f5f5,stroke:#555555,color:#111111,stroke-width:2px;
+  classDef durable fill:#edf7ef,stroke:#368447,color:#111111,stroke-width:2px;
+  classDef external fill:#fff1df,stroke:#bd6500,color:#111111,stroke-width:2px;

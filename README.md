@@ -28,18 +28,21 @@ context. Open "Show work" under each question to see every query the agent ran.
    has to join the two.
 6. **Which clubs sent the most players to the 2026 World Cup?**
    This one uses the 2026 squads table.
-7. **Your database role is supposed to be read-only. Check it: try to delete the 1950 World Cup
-   matches and show me exactly what Postgres says.**
-   In testing, `gpt-6-sol` would not send the DELETE. It checked its own grants instead and
-   reported that its role has no DELETE permission. To see Postgres refuse the write itself, run
-   the `psql` command under [Point it at your own database](#point-it-at-your-own-database).
+7. **Try deleting the 1950 World Cup matches and tell me what the database says.**
+   The agent sends a DELETE, and Postgres refuses it with "permission denied for table matches".
+   The agent's role can read five tables and nothing else. Open "Show work" to see the error.
 
 ## How it works
+
+![How the football data agent fits together](docs/architecture.png)
+
+The diagram's source is [`docs/architecture.mmd`](docs/architecture.mmd).
 
 ```text
 frontend/   React app: sessions, chat, and the dashboard
 backend/    FastAPI and the agent
 db/         Postgres setup: tables, the data, and the agent's role
+docs/       the architecture diagram
 ```
 
 **The agent** is in [`backend/agent.py`](backend/agent.py). Deep Agents runs the loop: the model
@@ -74,6 +77,28 @@ so the time limit is also set in the query tool.
 `football-data` skill is the example: penalty shootouts are not in the score, own goals are
 credited to the other team, and "home" means nothing at a World Cup.
 
+**What the app saves.** Postgres holds two databases. `football` is the data, and the agent
+can only read it. `app` belongs to the backend and holds everything the app produces:
+
+| Table | What it holds |
+|---|---|
+| `sessions` | Each session's id, title, and start time |
+| `results` | Every query the agent ran: the SQL, the columns, up to 1,000 rows, the row count, any error, and how long it took |
+| `artifacts` | Each dashboard item: the result it shows, its title, the chart type, and its columns |
+| `runs` | Each question with its model, time, tokens, and cost |
+| `checkpoint*` | The agent's conversation memory for each session, written by the LangGraph checkpointer: every message, tool call, tool result, and to-do list |
+
+The frontend gets its data two ways. While a question runs, `POST /api/sessions/{id}/ask`
+streams each step as a server-sent event, and each new dashboard item is fetched with its SQL
+and rows from `GET /api/artifacts/{id}`. When you open a session, `GET /api/sessions/{id}`
+returns the chat rebuilt from the saved conversation, the dashboard items, and the costs.
+
+To look at the saved data yourself:
+
+```bash
+docker compose exec -e PGPASSWORD=app-demo-password db psql -h localhost -U app -d app -c "SELECT question, seconds, cost_usd FROM runs"
+```
+
 **Logs.** The backend prints each step with where it happened: `APP` for the web app, `AGENT`
 for the model, and `DATABASE` for Postgres, with every query in full.
 
@@ -103,6 +128,13 @@ docker compose up --build
 
 Open http://localhost:5173, start a session, and ask the questions above. The first start loads
 the data into Postgres, which takes a few seconds.
+
+Edits to the skills in `backend/skills/` apply from the next question. After changing the
+Python code, rebuild the backend:
+
+```bash
+docker compose up -d --build backend
+```
 
 To start again with an empty database and no sessions:
 
@@ -146,8 +178,8 @@ The second command serves the backend on port 8000. Run the frontend with `npm i
 
 ## Costs
 
-Each answer shows its model calls, tokens, and cost at the foot of the chat, and the backend saves
-the same figures as a JSON file in `backend/runs/`. The price constants at the top of
+Each answer shows its model calls, tokens, and cost at the foot of the chat. The backend saves
+the same figures in the `runs` table and as a JSON file in `backend/runs/`. The price constants at the top of
 `backend/agent.py` feed that summary. Check them against the current price list.
 
 On my runs with `gpt-6-sol` on September 22, 2026, each demo question took 7 to 23 seconds and

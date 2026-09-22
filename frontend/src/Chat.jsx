@@ -11,8 +11,8 @@ const STARTERS = [
 ];
 
 // The backend sends a flat list of events. Group them into turns: one question, the steps the
-// agent took, and its answer.
-function toTurns(events) {
+// agent took, and its answer. Saved runs give earlier turns their cost line.
+function toTurns(events, runs) {
   const turns = [];
   for (const event of events) {
     if (event.type === "question") {
@@ -25,6 +25,7 @@ function toTurns(events) {
       else turn.steps.push(event);
     }
   }
+  turns.forEach((turn, i) => { if (!turn.done && runs[i]) turn.done = runs[i]; });
   return turns;
 }
 
@@ -117,10 +118,10 @@ function Turn({ turn, artifacts, live }) {
   );
 }
 
-export default function Chat({ title, events, artifacts, running, onAsk, onMenu }) {
+export default function Chat({ title, events, artifacts, runs, running, onAsk, onMenu }) {
   const [text, setText] = useState("");
   const bottom = useRef(null);
-  const turns = toTurns(events);
+  const turns = toTurns(events, runs);
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: "smooth" });
