@@ -98,15 +98,17 @@ function Turn({ turn, artifacts, live }) {
   return (
     <>
       <div className="user">{turn.question}</div>
-      <button className="work" onClick={() => setOpen(!open)}>
-        <span><b>{open ? "Hide work" : "Show work"}</b> {live ? latest(turn.steps) : summarize(turn.steps)}</span>
-        <span className="chevron">{open ? "▴" : "▾"}</span>
-      </button>
-      {open && (
-        <div className="steps">
-          {turn.steps.map((step, i) => <Step key={i} step={step} steps={turn.steps} artifacts={artifacts} />)}
-        </div>
-      )}
+      <div className={open ? "work-card open" : "work-card"}>
+        <button className="work" onClick={() => setOpen(!open)}>
+          <span><b>{open ? "Hide work" : "Show work"}</b> {live ? latest(turn.steps) : summarize(turn.steps)}</span>
+          <span className="chevron">{open ? "▴" : "▾"}</span>
+        </button>
+        {open && (
+          <div className="steps">
+            {turn.steps.map((step, i) => <Step key={i} step={step} steps={turn.steps} artifacts={artifacts} />)}
+          </div>
+        )}
+      </div>
       {turn.answer && <div className="answer">{turn.answer}</div>}
       {turn.error && <div className="sql-error">{turn.error}</div>}
       {cost && (
