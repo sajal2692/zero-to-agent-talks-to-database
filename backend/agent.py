@@ -50,7 +50,9 @@ dashboard with add_to_dashboard.
 
 Read the football-data skill before your first query in a conversation, and the dashboard skill
 before your first add_to_dashboard call. Answer in two or three sentences of plain text, without
-markdown, and give the numbers that matter. If the data cannot answer a question, say so."""
+markdown, and give the numbers that matter. Every number in your answer must appear in a query
+result. Do not add numbers up yourself: when you need a total, compute it in SQL. If the data
+cannot answer a question, say so."""
 
 
 def log(where, heading, body=""):
@@ -149,6 +151,30 @@ def run_query(sql: str, runtime: ToolRuntime) -> tuple[str, dict]:
     return text, {"result_id": result_id, "row_count": len(rows), "truncated": truncated, "ms": ms}
 
 
+def view_problem(view, x, y, rows, is_number):
+    """The dashboard's rules for which view fits which result. Returns what to change, or None.
+    The dashboard skill explains the same rules to the model."""
+    if view == "table":
+        return None
+    if not y or not all(is_number(c) for c in y):
+        return "Name one or more y columns that hold numbers, or use view='table'."
+    if view == "stat":
+        return "A stat shows one row. Use a chart or a table for several rows." if len(rows) > 1 else None
+    if len(rows) == 1:
+        return "One row is a headline number. Use view='stat', with the row's name as x, or view='table'."
+    if not x:
+        return "A chart needs an x column that names each bar, slice, or point."
+    if view in ("line", "area") and len(rows) < 3:
+        return "A line needs three or more points. Use view='bar' to compare two."
+    if view == "pie" and len(rows) > 6:
+        return "A pie reads well with six slices or fewer. Use 'bar' to rank, or 'treemap' for many parts."
+    if view == "stacked_bar" and len(y) < 2:
+        return "A stacked bar needs two or more y columns that add up to a total. Use view='bar' for one."
+    if view == "scatter" and (len(y) != 2 or len(rows) < 5):
+        return "A scatter needs exactly two y columns and five or more rows."
+    return None
+
+
 # 3. Tool two: put a result on the dashboard. The chart uses the stored rows, so its numbers
 #    come from the database and never from the model.
 @tool(response_format="content_and_artifact")
@@ -164,19 +190,23 @@ def add_to_dashboard(
 
     result_id: the id run_query returned. x: the category or time column. y: one or more
     numeric columns. For view="table", leave x and y out. For view="stat", y names the numbers
-    to show from the first row. The dashboard skill says which view suits which result.
+    to show from a one-row result. The dashboard skill says which view suits which result, and
+    this tool refuses a view that does not fit, with the reason.
     """
     session_id = runtime.config["configurable"]["thread_id"]
     result = store.get_result(pool, result_id)
     if not result or result["session_id"] != session_id or result["error"]:
         return f"No usable result with id {result_id}. Run the query first.", {}
-    missing = [c for c in [x, *(y or [])] if c and c not in result["columns"]]
+    columns, rows = result["columns"], result["rows"] or []
+    missing = [c for c in [x, *(y or [])] if c and c not in columns]
     if missing:
         return f"These columns are not in result {result_id}: {', '.join(missing)}", {}
-    if view == "stat" and not y:
-        return "Headline numbers need at least one y column.", {}
-    if view not in ("table", "stat") and not (x and y):
-        return "A chart needs an x column and at least one y column.", {}
+    is_number = lambda c: all(row[columns.index(c)] is None or isinstance(row[columns.index(c)], (int, float))
+                              for row in rows)
+    problem = view_problem(view, x, y or [], rows, is_number)
+    if problem:
+        log("APP", f"Dashboard view refused: {view}", problem)
+        return f"Not added. {problem}", {}
 
     artifact_id = store.save_artifact(pool, session_id, result_id, title, view, x, y or [])
     return f"Added to the dashboard as item {artifact_id}.", {"artifact_id": artifact_id}

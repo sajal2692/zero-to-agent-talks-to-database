@@ -40,5 +40,8 @@ Then run the query again with the exact value.
 
 ## Before you answer
 
+Every number you give must be in a query result. If the answer needs a total or an average of
+rows you already have, run one more query that computes it. Do not add rows up in your head.
+
 Check that the numbers make sense. A team cannot have more wins than matches, and a World Cup
 has at most 104 matches. If something looks wrong, look again before you answer.

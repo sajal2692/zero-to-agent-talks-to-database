@@ -45,8 +45,11 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent);
 .session span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .session:hover { background: var(--bg); }
 .session.on { background: var(--soft); color: var(--ink); font-weight: 600; }
-.delete { background: none; border: none; color: var(--muted); font-size: 16px; visibility: hidden; }
-.session:hover .delete { visibility: visible; }
+.delete { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 26px; height: 26px;
+  background: none; border: none; border-radius: 6px; color: var(--muted); opacity: 0; }
+.session:hover .delete, .delete:focus-visible { opacity: .75; }
+.delete:hover { opacity: 1; color: #b42318; background: #fdecea; }
+@media (hover: none) { .delete { opacity: .75; } }   /* touch screens have no hover */
 
 /* Chat */
 .chat { background: var(--panel); border-right: 1px solid var(--line); min-width: 0; min-height: 0;
@@ -108,6 +111,7 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent);
 .item.wide { grid-column: 1 / -1; }
 .item.view-table { height: auto; max-height: clamp(300px, 50vh, 480px); }
 .item.view-stat { height: auto; }
+.stat-caption { font-size: 16px; font-weight: 600; margin: 2px 0 10px; }
 .stats { display: flex; flex-wrap: wrap; gap: 12px; padding: 4px 0 2px; }
 .stat { flex: 1 1 140px; background: var(--soft); border-radius: 10px; padding: 14px 16px; }
 .stat-value { font-size: 34px; font-weight: 700; color: var(--accent); line-height: 1.1; font-variant-numeric: tabular-nums; }

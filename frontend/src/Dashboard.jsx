@@ -30,24 +30,32 @@ function Table({ artifact }) {
   );
 }
 
-// Headline numbers: one tile per y column, from the first row. The x column, if any, labels them.
+// Headline numbers: one tile per numeric column, from the first row. The row's text, such as a
+// player's name, sits above the tiles.
 function Stats({ artifact }) {
   const row = artifact.rows[0] || [];
-  const names = artifact.y.length ? artifact.y : artifact.columns;
-  const caption = artifact.x ? row[artifact.columns.indexOf(artifact.x)] : null;
+  const at = (name) => row[artifact.columns.indexOf(name)];
+  const numbers = artifact.y.length ? artifact.y : artifact.columns.filter((c) => typeof at(c) === "number");
+  const caption = artifact.columns.filter((c) => typeof at(c) === "string").map(at).join(" · ");
   return (
-    <div className="stats">
-      {names.map((name) => (
-        <div key={name} className="stat">
-          <div className="stat-value">{formatNumber(row[artifact.columns.indexOf(name)])}</div>
-          <div className="stat-label">{columnLabel(name)}{caption ? ` · ${caption}` : ""}</div>
-        </div>
-      ))}
-    </div>
+    <>
+      {caption && <div className="stat-caption">{caption}</div>}
+      <div className="stats">
+        {numbers.map((name) => (
+          <div key={name} className="stat">
+            <div className="stat-value">{formatNumber(at(name))}</div>
+            <div className="stat-label">{columnLabel(name)}</div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
 
-function Item({ artifact }) {
+function Item({ artifact: saved }) {
+  // A chart of a single row has nothing to compare, so it shows as headline numbers.
+  const oneRowChart = saved.row_count === 1 && !["table", "stat"].includes(saved.view);
+  const artifact = oneRowChart ? { ...saved, view: "stat" } : saved;
   const [showSql, setShowSql] = useState(false);
   const [copied, setCopied] = useState(false);
 

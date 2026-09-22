@@ -16,16 +16,17 @@ dashboard item to turn it over to its SQL.
 
 | # | Question | What to look for |
 |---|---|---|
-| 1 | Who scored the most goals at the 2026 World Cup? Show me a chart. | A bar chart. The agent reads the `football-data` skill first and leaves own goals out. |
+| 1 | Who scored the most goals at the 2026 World Cup? Show me a chart. | A bar chart of the top 10. The agent reads the `football-data` skill first and leaves own goals out. |
 | 2 | And of all time? | A follow-up. It keeps the World Cup and the own-goal rule from question 1. |
 | 3 | Has the World Cup become more or less goal-heavy over the decades? | A line chart of goals per match. It compares per match, because 2026 had 104 matches. |
 | 4 | Show me Brazil's wins, draws and losses at each World Cup. | Stacked bars. Penalty shootouts count as draws, because a shootout is not in the score. |
-| 5 | Now compare Brazil and Argentina on wins since 1990. | A line chart with one line per team, built from the context of question 4. |
-| 6 | Give me Brazil's headline World Cup numbers. | Number tiles in place of a one-row table. |
-| 7 | Which countries' leagues supplied the most players at the 2026 World Cup? | A bar chart from the 2026 squads table. |
-| 8 | Show that as a treemap. | The same result, redrawn as a treemap without a new query. |
-| 9 | How did Spain get to the 2026 final? | A table. The data has no round column, so the skill supplies the 2026 stage dates. |
-| 10 | Try deleting the 1950 World Cup matches and tell me what the database says. | Postgres refuses: "permission denied for table matches". The agent's role can read five tables and nothing else. |
+| 5 | Now compare Brazil and Argentina on wins since 1990. | A follow-up with one colour per team. The totals come from a query, not the model's arithmetic. |
+| 6 | Give me Brazil's headline World Cup numbers. | Number tiles. A chart of one row compares nothing, and the tool refuses it. |
+| 7 | How are Brazil's results split between wins, draws and losses? | A pie chart of three parts of one whole. |
+| 8 | Which countries' leagues supplied the most players at the 2026 World Cup? | A bar chart from the 2026 squads table. |
+| 9 | Show that as a treemap. | The same result, redrawn as a treemap without a new query. |
+| 10 | How did Spain get to the 2026 final? | A table. The data has no round column, so the skill supplies the 2026 stage dates. |
+| 11 | Try deleting the 1950 World Cup matches and tell me what the database says. | Postgres refuses: "permission denied for table matches". The agent's role can read five tables and nothing else. |
 
 ## How it works
 
@@ -177,9 +178,9 @@ Each answer shows its model calls, tokens, and cost at the foot of the chat. The
 the same figures in the `runs` table and as a JSON file in `backend/runs/`. The price constants at the top of
 `backend/agent.py` feed that summary. Check them against the current price list.
 
-On my runs with `gpt-6-sol` on September 22, 2026, each demo question took 7 to 23 seconds and
-3 or 4 model calls, and cost between $0.006 and $0.022. The seven questions together cost about
-nine cents.
+On my runs with `gpt-6-sol` on September 22, 2026, each demo question took 8 to 33 seconds and
+2 to 5 model calls, and cost between $0.007 and $0.019. The eleven questions together cost 13
+cents.
 
 ## Data and credits
 
