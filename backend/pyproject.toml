@@ -1,0 +1,17 @@
+[project]
+name = "football-data-agent-backend"
+version = "0.1.0"
+description = "FastAPI backend for the Zero to Agent in 30 session: Build an Agent That Talks to Your Database"
+requires-python = ">=3.12"
+dependencies = [
+    "deepagents==0.7.16",
+    "fastapi>=0.141.1",
+    "langchain-openai>=1.6.3",
+    "langgraph-checkpoint-postgres>=3.1.2",
+    "psycopg[binary,pool]>=3.3.6",
+    "python-dotenv>=1.2.3",
+    "uvicorn[standard]>=0.53.0",
+]
+
+[tool.uv]
+package = false

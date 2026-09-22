@@ -1,0 +1,49 @@
+# Three containers: Postgres with the football data, the FastAPI backend, and the React frontend.
+# Start everything with: docker compose up --build
+# Then open http://localhost:5173
+
+services:
+  db:
+    image: postgres:18.0-alpine
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      AGENT_DB_PASSWORD: ${AGENT_DB_PASSWORD}
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d:ro   # tables, data load, and the agent's role
+      - ./db/data:/data:ro                          # the CSVs
+      - pgdata:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "football"]
+      interval: 2s
+      retries: 30
+
+  backend:
+    build: ./backend
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      AGENT_DB_PASSWORD: ${AGENT_DB_PASSWORD}
+      DB_HOST: db
+    volumes:
+      - ./backend/runs:/app/runs                    # one JSON file per question, with its cost
+    ports:
+      - "8000:8000"
+    tty: true                                       # keeps the coloured log lines
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    environment:
+      API_URL: http://backend:8000                  # Vite passes /api calls to the backend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

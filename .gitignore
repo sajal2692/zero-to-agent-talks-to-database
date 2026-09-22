@@ -1,0 +1,9 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+**/.venv/
+**/__pycache__/
+backend/runs/
+frontend/node_modules/
+frontend/dist/
