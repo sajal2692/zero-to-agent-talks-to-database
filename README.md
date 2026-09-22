@@ -139,7 +139,7 @@ docker compose down -v
 docker compose up --build
 ```
 
-### Point it at your own database
+### Your own database
 
 1. Create a read-only role on your database using `db/init/03_agent_role.sql` as the pattern.
    Grant SELECT on the tables or views the agent should read, and nothing else. Check it by
@@ -158,7 +158,7 @@ docker compose up --build
 Every row the agent reads is sent to the model provider. Grant views that leave out anything that
 should stay private.
 
-### Try it without an API key
+### Without an API key
 
 The backend has a scripted stand-in for the model that plays one fixed conversation against the
 real database. It costs nothing. With the database running (`docker compose up db`), from

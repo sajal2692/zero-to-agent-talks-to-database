@@ -145,7 +145,7 @@ export default function Chat({ title, events, artifacts, runs, running, onAsk, o
       <div className="messages">
         {turns.length === 0 && (
           <div className="empty">
-            <h2>Ask about 150 years of international football</h2>
+            <h2>150 years of international football</h2>
             <p>Every men's international match since 1872, and every goal at the 2026 World Cup.</p>
             {STARTERS.map((q) => (
               <button key={q} className="starter" disabled={running} onClick={() => send(q)}>{q}</button>
